@@ -5,10 +5,10 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import Skeleton from "@mui/material/Skeleton"; // ✅ Import Skeleton
 import CommentSection from "../components/CommentSection";
 import Rating from "../components/Rating";
 import { fetchMedia, submitComment } from "../services/api";
-import videos from "../data/videos";
 import banner from "../assets/images/banner5.jpg";
 
 const MediaDetails = () => {
@@ -16,84 +16,67 @@ const MediaDetails = () => {
   const location = useLocation();
   const [media, setMedia] = useState(null);
   const [comments, setComments] = useState([]);
-  // log comments
-  console.log(comments);
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Keep API fetching logic (commented out for now)
-useEffect(() => {
-  const loadMedia = async () => {
-    if (!id || typeof id !== "string") {
-      setError("Invalid media ID");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const fetchedMedia = await fetchMedia(String(id).trim()); // Ensure it's a string
-      if (!fetchedMedia) {
-        setError("Media not found");
+  useEffect(() => {
+    const loadMedia = async () => {
+      if (!id || typeof id !== "string") {
+        setError("Invalid media ID");
         return;
       }
 
-      setMedia(fetchedMedia);
-      console.log(fetchedMedia);
-      setComments(fetchedMedia.comments || []);
-      console.log(fetchedMedia.comments);
-    } catch (error) {
-      setError("Failed to load media");
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        setLoading(true);
+        const fetchedMedia = await fetchMedia(String(id).trim());
+        if (!fetchedMedia) {
+          setError("Media not found");
+          return;
+        }
 
-  loadMedia();
-}, [id]);
+        setMedia(fetchedMedia);
+        setComments(fetchedMedia.comments || []);
+      } catch (error) {
+        setError("Failed to load media");
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    loadMedia();
+  }, [id]);
 
+ const handleAddComment = async () => {
+   if (!comment.trim()) return;
 
-const handleAddComment = async () => {
-  if (!comment.trim()) return;
+   const newComment = {
+     uploadId: id,
+     comment,
+   };
 
-  const newComment = {
-    uploadId: id,
-    comment,
-  };
+     const username = localStorage.getItem("username") || "Guest"; 
+   // Optimistic UI update (Ensure immediate state update)
+   setComments((prevComments) => [
+     ...prevComments,
+     { username, text: comment, timestamp: new Date().toISOString() },
+   ]);
 
-  try {
-    await submitComment(newComment, location.pathname);
-    setComments((prevComments) => [...prevComments, newComment.comment]);
-    setComment(""); // ✅ Clears the input after submission
-  } catch (error) {
-    console.error("Error submitting comment:", error);
-  }
-};
+   console.log("Updated Comments:", [...comments, { text: comment }]);
 
-  if (!media) {
-    return (
-      <Typography
-        variant="h6"
-        color="textSecondary"
-        sx={{ textAlign: "center", padding: "16px" }}
-      >
-        {error || "Loading..."}
-      </Typography>
-    );
-  }
+   setComment(""); // Clear input field after submission
 
-  if (loading) {
-    return (
-      <Typography
-        variant="h6"
-        color="textSecondary"
-        sx={{ textAlign: "center", padding: "16px" }}
-      >
-        Loading...
-      </Typography>
-    );
-  }
+   try {
+     // Send to backend (with correct structure)
+     await submitComment(newComment, location.pathname);
+   } catch (error) {
+     console.error("Error submitting comment:", error);
+
+     // Rollback UI if API call fails
+     setComments((prevComments) => prevComments.slice(0, -1));
+   }
+ };
+
 
   if (error) {
     return (
@@ -110,27 +93,47 @@ const handleAddComment = async () => {
   return (
     <Box sx={{ padding: "16px", maxWidth: "900px", margin: "auto" }}>
       {/* Banner Image */}
-      <Box
-        component="img"
-        src={media?.category === "images" ? media.url : banner}
-        alt="Banner"
-        sx={{
-          width: "100%",
-          height: "250px",
-          objectFit: "cover",
-          borderRadius: "8px",
-          marginBottom: "16px",
-          boxShadow: 3,
-        }}
-      />
+      {loading ? (
+        <Skeleton
+          variant="rectangular"
+          width="100%"
+          height={250}
+          sx={{ borderRadius: "8px" }}
+        />
+      ) : (
+        <Box
+          component="img"
+          src={media?.category === "images" ? media.url : banner}
+          alt="Banner"
+          sx={{
+            width: "100%",
+            height: "250px",
+            objectFit: "cover",
+            borderRadius: "8px",
+            marginBottom: "16px",
+            boxShadow: 3,
+          }}
+        />
+      )}
 
       {/* Media Title */}
-      <Typography variant="h4" gutterBottom>
-        {media.title}
-      </Typography>
+      {loading ? (
+        <Skeleton variant="text" width="80%" height={40} />
+      ) : (
+        <Typography variant="h4" gutterBottom>
+          {media?.title}
+        </Typography>
+      )}
 
-      {/* Display Media (Video or Image) */}
-      {media?.category === "videos" || media?.category === "movies" ? (
+      {/* Display Media */}
+      {loading ? (
+        <Skeleton
+          variant="rectangular"
+          width="100%"
+          height={500}
+          sx={{ borderRadius: "8px" }}
+        />
+      ) : media?.category === "videos" || media?.category === "movies" ? (
         <Box
           component="video"
           controls
@@ -159,7 +162,7 @@ const handleAddComment = async () => {
       )}
 
       {/* Rating */}
-      <Rating mediaId={media.id} initialRating={media.rating} />
+      {!loading && <Rating mediaId={media?.id} initialRating={media?.rating} />}
 
       {/* Comments Section */}
       <CommentSection comments={comments} />

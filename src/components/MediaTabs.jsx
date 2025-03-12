@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Tabs, Tab, Box, Pagination, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2"; 
+import { Tabs, Tab, Box, Pagination, Typography, Skeleton } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import MediaCard from "./MediaCard";
 
-const MediaTabs = ({ mediaData }) => {
+const MediaTabs = ({ mediaData, loading }) => {
   const [tab, setTab] = useState("all");
   const [page, setPage] = useState(1);
   const itemsPerPage = 4;
@@ -16,10 +16,7 @@ const MediaTabs = ({ mediaData }) => {
 
   // Paginate media
   const startIndex = (page - 1) * itemsPerPage;
-  const paginatedMedia = filteredMedia.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  const paginatedMedia = filteredMedia.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <Box sx={{ width: "100%", textAlign: "center", marginTop: 4 }}>
@@ -32,20 +29,10 @@ const MediaTabs = ({ mediaData }) => {
         }}
         centered
         sx={{
-          "& .MuiTabs-indicator": {
-            backgroundColor: "var(--primary-color)", // Active tab indicator
-          },
-          "& .MuiTab-root": {
-            color: "var(--secondary-color)", // Default tab color
-            transition: "0.3s",
-          },
-          "& .Mui-selected": {
-            color: "var(--primary-color)", // Active tab color
-            fontWeight: "bold",
-          },
-          "& .MuiTab-root:hover": {
-            color: "var(--primary-color)", // Hover effect
-          },
+          "& .MuiTabs-indicator": { backgroundColor: "var(--primary-color)" },
+          "& .MuiTab-root": { color: "var(--secondary-color)", transition: "0.3s" },
+          "& .Mui-selected": { color: "var(--primary-color)", fontWeight: "bold" },
+          "& .MuiTab-root:hover": { color: "var(--primary-color)" },
         }}
       >
         <Tab label="All" value="all" />
@@ -54,20 +41,27 @@ const MediaTabs = ({ mediaData }) => {
         <Tab label="Images" value="images" />
       </Tabs>
 
-      {/* Show No Media Message if Empty */}
-      {filteredMedia.length === 0 ? (
+      {/* Show Skeleton Loader when Loading */}
+      {loading ? (
+        <Grid container spacing={2} justifyContent="center" sx={{ marginTop: 2 }}>
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Grid key={index} size={{ xs: 12, sm: 3, md: 3 }}>
+              <Box sx={{ width: "100%", padding: 2 }}>
+                <Skeleton variant="rectangular" width="100%" height={180} />
+                <Skeleton variant="text" width="80%" sx={{ mt: 1 }} />
+                <Skeleton variant="text" width="60%" />
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      ) : filteredMedia.length === 0 ? (
         <Typography variant="h6" sx={{ marginTop: 3, color: "gray" }}>
           No media available
         </Typography>
       ) : (
         <>
           {/* Media Grid */}
-          <Grid
-            container
-            spacing={2}
-            justifyContent="center"
-            sx={{ marginTop: 2 }}
-          >
+          <Grid container spacing={2} justifyContent="center" sx={{ marginTop: 2 }}>
             {paginatedMedia.map((media) => (
               <Grid key={media.id} size={{ xs: 12, sm: 3, md: 3 }}>
                 <MediaCard media={media} />
@@ -85,16 +79,9 @@ const MediaTabs = ({ mediaData }) => {
                 marginTop: 3,
                 display: "flex",
                 justifyContent: "center",
-                "& .MuiPaginationItem-root": {
-                  color: "var(--secondary-color)", // Default pagination color
-                },
-                "& .Mui-selected": {
-                  backgroundColor: "var(--primary-color) !important", // Active page color
-                  color: "white",
-                },
-                "& .MuiPaginationItem-root:hover": {
-                  backgroundColor: "var(--primary-color-light)", // Hover effect
-                },
+                "& .MuiPaginationItem-root": { color: "var(--secondary-color)" },
+                "& .Mui-selected": { backgroundColor: "var(--primary-color) !important", color: "white" },
+                "& .MuiPaginationItem-root:hover": { backgroundColor: "var(--primary-color-light)" },
               }}
             />
           )}

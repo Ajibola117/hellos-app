@@ -33,6 +33,9 @@ export const login = async ({ username, password }) => {
     const { token, user } = response.data;
 
     localStorage.setItem("token", token);
+    // set username
+    localStorage.setItem("username", user.username);
+    // set role
     localStorage.setItem("role", user.role);
 
     return user;
