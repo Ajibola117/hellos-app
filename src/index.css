@@ -1,0 +1,68 @@
+:root {
+  --primary-color: #ff0e1f; /* Your app's primary color */
+  --secondary-color: #a7a7a7; /* Secondary color */
+  --footer-color: rgba(7, 7, 23, 1); /* Text color */
+  --header-color: #fff; /* Header color */
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    color: #888888;
+    font-family: Roboto;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 28px;
+    background-color: #131929;
+    min-height: 100vh;
+}
+
+header {
+  color: var(--header-color);
+  background-color: var(--secondary-color);
+  padding: 10px 0;
+  font-size: 24px;
+}
+
+footer {
+    color: #7c7f88;
+    font-size: 15px;
+    background: rgba(7, 7, 23, 1);
+    padding-top: 90px;
+    padding-bottom: 65px;
+}
+
+.video-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
+}
+
+h2{
+  font-size: 2.0em;
+}
+
+.comment-section {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.comment {
+  background-color: #f1f1f1;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  color: #333;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
